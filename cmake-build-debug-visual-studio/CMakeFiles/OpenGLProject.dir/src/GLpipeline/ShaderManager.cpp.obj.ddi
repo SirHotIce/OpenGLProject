@@ -1,0 +1,14 @@
+{
+    "version": 1,
+    "revision": 0,
+    "rules": [
+        {
+            "primary-output": "CMakeFiles\\OpenGLProject.dir\\src\\GLpipeline\\ShaderManager.cpp.obj",
+            "outputs": [
+                "C:\\Users\\Vin\\CLionProjects\\OpenGLProject\\cmake-build-debug-visual-studio\\vc140.pdb",
+                "CMakeFiles\\OpenGLProject.dir\\src\\GLpipeline\\ShaderManager.cpp.obj.ddi"
+            ],
+            "requires": []
+        }
+    ]
+}

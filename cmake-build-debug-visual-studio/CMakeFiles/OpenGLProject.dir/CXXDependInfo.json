@@ -1,0 +1,25 @@
+{
+	"bmi-installation" : null,
+	"compiler-frontend-variant" : "MSVC",
+	"compiler-id" : "MSVC",
+	"compiler-simulate-id" : "",
+	"config" : "Debug",
+	"cxx-modules" : {},
+	"dir-cur-bld" : "C:/Users/Vin/CLionProjects/OpenGLProject/cmake-build-debug-visual-studio",
+	"dir-cur-src" : "C:/Users/Vin/CLionProjects/OpenGLProject",
+	"dir-top-bld" : "C:/Users/Vin/CLionProjects/OpenGLProject/cmake-build-debug-visual-studio",
+	"dir-top-src" : "C:/Users/Vin/CLionProjects/OpenGLProject",
+	"exports" : [],
+	"forward-modules-from-target-dirs" : [],
+	"include-dirs" : 
+	[
+		"C:\\Users\\Vin\\CLionProjects\\OpenGLProject\\external",
+		"C:\\Users\\Vin\\CLionProjects\\OpenGLProject\\external\\glew\\include",
+		"C:\\Users\\Vin\\CLionProjects\\OpenGLProject\\external\\glfw\\include",
+		"C:\\Users\\Vin\\CLionProjects\\OpenGLProject\\external\\assimp\\include",
+		"C:\\Users\\Vin\\CLionProjects\\OpenGLProject\\external\\glm"
+	],
+	"language" : "CXX",
+	"linked-target-dirs" : [],
+	"module-dir" : "C:/Users/Vin/CLionProjects/OpenGLProject/cmake-build-debug-visual-studio/CMakeFiles/OpenGLProject.dir"
+}

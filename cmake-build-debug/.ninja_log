@@ -1,0 +1,9 @@
+# ninja log v6
+758	873	7642971389374968	OpenGLPractice.exe	d32ca2c2d54bfe0
+25	932	7643009571711604	CMakeFiles/OpenGLProject.dir/main.cpp.obj	6c380c950f8d79dc
+746	875	7642977518560800	OpenGLProject.exe	bca8832ab857bc5c
+33	286	7643018319472028	CMakeFiles/OpenGLProject.dir/main.cpp.obj.ddi	3fe1f8f48e51a3c0
+287	355	7643018322644424	CMakeFiles/OpenGLProject.dir/CXX.dd	31f41152c0a35f2b
+287	355	7643018322644424	C:/Users/Vin/CLionProjects/OpenGLProject/cmake-build-debug/CMakeFiles/OpenGLProject.dir/CXXModules.json	31f41152c0a35f2b
+287	355	7643018322644424	CMakeFiles/OpenGLProject.dir/main.cpp.obj.modmap	31f41152c0a35f2b
+364	1441	7643018322784051	CMakeFiles/OpenGLProject.dir/main.cpp.obj	f00166b4d44f7370
