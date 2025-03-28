@@ -23,14 +23,16 @@ uniform vec3 lightDir[MAX_LIGHT_COUNT];
 uniform vec4 lightColor[MAX_LIGHT_COUNT];
 uniform float ambientStrength[MAX_LIGHT_COUNT];
 uniform float diffuseStrength[MAX_LIGHT_COUNT];
-uniform float lightAttenuation[MAX_LIGHT_COUNT];
+uniform float linearAttenuation[MAX_LIGHT_COUNT];
+uniform float exponentAttenuation[MAX_LIGHT_COUNT];
+uniform float attenuationConstant[MAX_LIGHT_COUNT];
 uniform float lightAngle[MAX_LIGHT_COUNT];
 
 
 
 
 float calculateDiffuse(vec3 lightVector){
-    float diffFactor=max(dot(normalize(lightVector), normalize(Normals)), 0.0f);
+    float diffFactor=max(dot( normalize(Normals),normalize(lightVector)), 0.0f);
     return diffFactor;
 
 
@@ -46,28 +48,56 @@ float calculateSpecular(vec3 lightVector){
 
     return specularFactor;
 }
+vec4 CalculateLightValue(int lightIndex, vec3 direction){
+    vec4 ambientColor= lightColor[lightIndex]*ambientStrength[lightIndex];
+    float diffuseFactor= calculateDiffuse(direction);
+    vec4 diffuesColor= lightColor[lightIndex]*diffuseFactor*diffuseStrength[lightIndex];
+    vec4 specularColor= vec4(0.0f);
+    if(diffuseFactor>0){
+        float specularFactor= calculateSpecular(direction);
+        specularColor= vec4(1.0f)* specularFactor*material.specularIntensity;
+    }
+
+    vec4 calculatedColor= ambientColor+diffuesColor+specularColor;
+    return calculatedColor;
+}
+vec4 CalculatePointLight(int i){
+    vec3 directionLightToFragment= fragPos-lightPos[i];//vector of dir changes every fragment so we need to calculate it rather than justusing direction lik dirLight
+    float distaceToLight= length(directionLightToFragment);
+    vec4 totalLightColor= CalculateLightValue(i, normalize(directionLightToFragment));//we want direction normal , we are normalizing here as previously we needed its magnitude for length, if it was done befor ethe mag would be 1
+    float attenuation= exponentAttenuation[i]*distaceToLight*distaceToLight + linearAttenuation[i]*distaceToLight + attenuationConstant[i];//1 is a constant to prevent the denom being 0
+    vec4 finalColor= totalLightColor/attenuation;
+    return finalColor;
+}
 vec4 CalculateLights(){
     int i=0;
     vec4 fragmentLightColor;
     for(i;i<lightCount;i++){
-        if(lightType[i]==0){
-            //Dir Light
-            vec4 ambientColor= lightColor[i]*ambientStrength[i];
-            float diffuseFactor= calculateDiffuse(lightDir[i]);
-            vec4 diffuesColor= lightColor[i]*diffuseFactor;
-            vec4 specularColor= vec4(0.0f);
-            if(diffuseFactor>0){
-                float specularFactor= calculateSpecular(lightDir[i]);
-                specularColor= vec4(1.0f)* specularFactor*material.specularIntensity;
+
+        switch(lightType[i])
+        {
+            case 0://dir
+            fragmentLightColor+=CalculateLightValue(i, lightDir[i]);
+            break;
+            case 1://point
+            fragmentLightColor+=CalculatePointLight(i);
+            break;
+            case 2://spot
+            vec3 lightVec= fragPos-lightPos[i];
+            vec4 pointOnlyColor= CalculatePointLight(i);
+
+            float sptEdge= cos(lightAngle[i]);
+            float sptFactor= dot(normalize(lightVec), normalize(lightDir[i]));
+            vec4 finalColor= vec4(0.0f);
+
+            if(sptFactor<sptEdge){
+                float finalSptFactor= 1-(sptFactor*(1/1-sptEdge));
+                finalColor= pointOnlyColor*finalSptFactor;
             }
 
-            fragmentLightColor+= ambientColor+diffuesColor+specularColor;
+            fragmentLightColor+=finalColor;
 
-
-        }else if(lightType[i]==1){
-            //point Light
-        }else if(lightType[i]==2){
-            //spot Light
+            break;
         }
     }
     return fragmentLightColor;

@@ -17,25 +17,26 @@ namespace GLpipeline {
         std::string vertexShaderSource, fragmentShaderSource;
         std::string ReadFile(std::string fileName);
         void AddShader(GLuint shaderProgram, GLuint shader, GLenum shaderType, std::string shaderSource);
+        void InitShader();
     public:
         ShaderManager(const std::string &vertex_shader_source, const std::string &fragment_shader_source)
             : vertexShaderSource(vertex_shader_source),
               fragmentShaderSource(fragment_shader_source) {
+            InitShader();
         }
 
-          GLuint shader_program() const {
+          GLuint& shader_program()  {
             return shaderProgram;
         }
 
-          GLuint fragment_shader() const {
+           GLuint& fragment_shader()  {
             return fragmentShader;
         }
 
-          GLuint vertex_shader() const {
+           GLuint& vertex_shader()  {
             return vertexShader;
         }
 
-        void InitShader();
         void DestroyShader();
 
         ~ShaderManager() {DestroyShader();};

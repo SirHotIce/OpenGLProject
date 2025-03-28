@@ -1,3 +1,0 @@
-C:/Users/Vin/CLionProjects/OpenGLProject/cmake-build-debug-visual-studio/CMakeFiles/OpenGLProject.dir
-C:/Users/Vin/CLionProjects/OpenGLProject/cmake-build-debug-visual-studio/CMakeFiles/edit_cache.dir
-C:/Users/Vin/CLionProjects/OpenGLProject/cmake-build-debug-visual-studio/CMakeFiles/rebuild_cache.dir

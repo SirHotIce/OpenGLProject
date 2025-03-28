@@ -3,7 +3,6 @@
 //
 
 #include "CameraManager.h"
-
 #include <iostream>
 #include <ostream>
 
@@ -48,6 +47,10 @@ const glm::mat4 & GLpipeline::CameraManager::get_updated_view() {
     return view;
 }
 
-const glm::vec3 GLpipeline::CameraManager::get_camera_position() {
+ glm::vec3& GLpipeline::CameraManager::get_camera_position() {
     return camPosition;
+}
+
+ glm::vec3 & GLpipeline::CameraManager::get_camera_front()  {
+    return front;
 }

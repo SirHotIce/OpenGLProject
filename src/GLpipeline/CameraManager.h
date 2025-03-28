@@ -48,7 +48,8 @@ namespace GLpipeline {
         void MoveCamera(GLfloat x, GLfloat y, GLfloat z, float deltaTime);
         const glm::mat4& get_projection();
         const glm::mat4& get_updated_view();
-        const glm::vec3 get_camera_position();
+         glm::vec3& get_camera_position() ;
+         glm::vec3& get_camera_front() ;
 
     };
 }

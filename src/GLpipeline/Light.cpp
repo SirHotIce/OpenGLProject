@@ -9,38 +9,44 @@
 void GLpipeline::Light::CreateDirectionalLight(glm::vec3 light_dir, glm::vec4 light_color, float ambient_strength,
                                                float diffuse_strength) {
     lightType=0;
-    lightDir = glm::normalize(light_dir);
+    lightDir = light_dir;
     lightColor= light_color;
     ambientStrength = ambient_strength;
     diffuseStrength = diffuse_strength;
     lightPos = glm::vec3(0, 0, 0);
-    lightAttenuation=0.0f;
+    linearAtt=0.0f;
+    exponentAtt=0.0f;
     cutOffAngle= 0.0f;
+    attConstant=0.0f;
 }
 
 void GLpipeline::Light::CreatePointLight(glm::vec3 light_position, glm::vec4 light_color,
-    float ambient_strength, float diffuse_strength, float attenuation) {
+    float ambient_strength, float diffuse_strength,float linear_att, float exponent_att, float att_constant) {
     lightType=1;
     lightPos = light_position;
     lightDir = glm::vec3(0, 0, 0);
     lightColor= light_color;
     ambientStrength = ambient_strength;
     diffuseStrength = diffuse_strength;
-    lightAttenuation = attenuation;
+    linearAtt= linear_att;
+    exponentAtt= exponent_att;
     cutOffAngle = 0.0f;
+    attConstant = att_constant;
 
 }
 
-void GLpipeline::Light::CreateSpotLight(glm::vec3 light_position, glm::vec4 light_color,
-    float ambient_strength, float diffuse_strength, float attenuation, float cutoff) {
+void GLpipeline::Light::CreateSpotLight(glm::vec3 light_dir, glm::vec3 light_position, glm::vec4 light_color,
+    float ambient_strength, float diffuse_strength, float linear_att, float exponent_att, float att_constant,float cutoff) {
     lightType=2;
     lightPos = light_position;
-    lightDir = glm::vec3(0, 0, 0);
+    lightDir = light_dir;
     lightColor= light_color;
     ambientStrength = ambient_strength;
     diffuseStrength = diffuse_strength;
-    lightAttenuation = attenuation;
+    linearAtt= linear_att;
+    exponentAtt= exponent_att;
     cutOffAngle = cutoff;
+    attConstant= att_constant;
 
 }
 /*
@@ -50,7 +56,9 @@ uniform vec3 lightDir[MAX_LIGHT_COUNT];
 uniform vec4 lightColor[MAX_LIGHT_COUNT];
 uniform float ambientStrength[MAX_LIGHT_COUNT];
 uniform float diffuseStrength[MAX_LIGHT_COUNT];
-uniform float lightAttenuation[MAX_LIGHT_COUNT];
+uniform float linearAttenuation[MAX_LIGHT_COUNT];
+uniform float exponentAttenuation[MAX_LIGHT_COUNT];
+uniform float attenuationConstant[MAX_LIGHT_COUNT];
 uniform float lightAngle[MAX_LIGHT_COUNT];
 */
 
@@ -66,18 +74,22 @@ void GLpipeline::Light::SetupLights(std::vector<Light>& lights, GLuint shaderPro
         GLuint lightColorLocation= glGetUniformLocation(shaderProgram, std::format("lightColor[{}]", i).c_str() );
         GLuint ambientStrengthLocation= glGetUniformLocation(shaderProgram, std::format("ambientStrength[{}]", i).c_str() );
         GLuint diffuseStrengthLocation= glGetUniformLocation(shaderProgram, std::format("diffuseStrength[{}]", i).c_str() );
-        GLuint lightAttenuationLocation= glGetUniformLocation(shaderProgram, std::format("lightAttenuation[{}]", i).c_str() );
+        GLuint linearAttenLocation= glGetUniformLocation(shaderProgram, std::format("linearAttenuation[{}]", i).c_str() );
+        GLuint expAttenLocation= glGetUniformLocation(shaderProgram, std::format("exponentAttenuation[{}]", i).c_str() );
         GLuint lightAngleLocation= glGetUniformLocation(shaderProgram, std::format("lightAngle[{}]", i).c_str() );
+        GLuint attenuationConstantLocation= glGetUniformLocation(shaderProgram, std::format("attenuationConstant[{}]", i).c_str() );
 
         //pass the data
-        glUniform1f(lightTypeLocation, lights[i].lightType);
+        glUniform1i(lightTypeLocation, lights[i].lightType);
         glUniform3fv(lightPosLocation, 1, glm::value_ptr(lights[i].lightPos));
         glUniform3fv(lightDirLocation, 1, glm::value_ptr(lights[i].lightDir));
         glUniform4fv(lightColorLocation, 1, glm::value_ptr(lights[i].lightColor));
         glUniform1f(ambientStrengthLocation, lights[i].ambientStrength);
         glUniform1f(diffuseStrengthLocation, lights[i].diffuseStrength);
-        glUniform1f(lightAttenuationLocation, lights[i].lightAttenuation);
-        glUniform1f(lightAngleLocation, lights[i].cutOffAngle);
+        glUniform1f(linearAttenLocation, lights[i].linearAtt);
+        glUniform1f(expAttenLocation, lights[i].exponentAtt);
+        glUniform1f(attenuationConstantLocation, lights[i].attConstant);
+        glUniform1f(lightAngleLocation, glm::radians(lights[i].cutOffAngle));
 
     }
 }

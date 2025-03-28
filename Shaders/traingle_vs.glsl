@@ -14,7 +14,7 @@ void main(){
 
     position= projection*view*model*vec4(pos,1.0);
     UVs=UVin;
-    Normals= mat3(transpose(inverse(model)))*NormalsIn;
+    Normals= - mat3(transpose(inverse(model)))*NormalsIn;//normals were orignally filpped when imported. so we are filpping them back
     fragPos= (model*vec4(pos, 1.0)).xyz;
     gl_Position=position;
 }

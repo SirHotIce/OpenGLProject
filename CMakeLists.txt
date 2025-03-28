@@ -29,6 +29,8 @@ add_executable(OpenGLProject src/main.cpp
         src/GLpipeline/Light.h
         src/GLpipeline/Material.cpp
         src/GLpipeline/Material.h
+        src/GLpipeline/Mesh.cpp
+        src/GLpipeline/Mesh.h
 )
 #link opengl
 find_package(OpenGL REQUIRED)
@@ -100,6 +102,16 @@ add_custom_command(TARGET OpenGLProject POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E remove_directory "${TEXTURE_OUTPUT_DIRECTORY}"
         COMMAND ${CMAKE_COMMAND} -E copy_directory "${TEXTURE_DIRECTORY}" "${TEXTURE_OUTPUT_DIRECTORY}"
         COMMENT "Refreshing and copying texture folder..."
+)
+
+
+set(MESH_DIRECTORY "${CMAKE_SOURCE_DIR}/Meshes")
+set(MESH_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/Meshes")
+
+add_custom_command(TARGET OpenGLProject POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E remove_directory "${MESH_OUTPUT_DIRECTORY}"
+        COMMAND ${CMAKE_COMMAND} -E copy_directory "${MESH_DIRECTORY}" "${MESH_OUTPUT_DIRECTORY}"
+        COMMENT "Refreshing and copying mesh folder..."
 )
 
 

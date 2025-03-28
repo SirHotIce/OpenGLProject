@@ -79,7 +79,7 @@ std::vector<GLfloat> pyramidUVs = {
     0.5f, 1.0f
 };
 std::vector<GLuint> pyramidIndices = {
-    0,3,1,
+   0,3,1,
     1,3,2,
     2,3,0,
     0,1,2
@@ -96,15 +96,15 @@ void PopulateWindowData() {
     mainWindow.cB=0.5f;
     mainWindow.cA=1.0f;
 }
-void TestTransform(ObjectTransform& transform) {
-    int randomX = (std::rand() % (10 - (-10) + 1)) + (-10);
-    int randomz = (std::rand() % (10 - (-10) + 1)) + (-10);
-    int randomy = (std::rand() % (10 - (-10) + 1)) + (-10);
-    int roty = (std::rand() % 180);
-    int rotz = (std::rand() % 180);
+void TestTransform(ObjectTransform& transform, int translationRange, int rotationRange) {
+    int randomX = (std::rand() % (translationRange - (-translationRange) + 1)) + (-translationRange);
+    int randomz = (std::rand() % (translationRange - (-translationRange) + 1)) + (-translationRange);
+    int randomy = (std::rand() % (translationRange - (-translationRange) + 1)) + (-translationRange);
+    int roty = (std::rand() % rotationRange);
+    int rotz = (std::rand() % rotationRange);
     transform.set_translation( glm::vec3(randomX, randomy, randomz));//move x =5, y=1
     transform.set_rotation(glm::vec3(0.0f, roty, rotz));//rotate 90 degres in z
-    transform.set_scale(glm::vec3(.40f, .40f, .40f));//make it small
+    transform.set_scale(glm::vec3(2.0f, 2.0f, 2.0f));//make it small
 }
 
 int main() {
@@ -114,20 +114,20 @@ int main() {
         return 1;
     }
 
-    int howManyCubes=15;
+    int howManyCubes=20;
+
     ShaderManager simpleShader(vsLocation, fsLocation);
-    simpleShader.InitShader();
+    GLuint& program= simpleShader.shader_program();
 //
     //create texs
     //this is a temp soln
 
-    std::string tex1Location="Textures/tex_1.jpg";
-    std::string tex2Location="Textures/tex_2.jpg";
-    Texture tex1(tex1Location);
-    tex1.LoadTexture();
-    Texture tex2(tex2Location);
-    tex2.LoadTexture();
+    std::string chickenTexLocation="Textures/chicken.png";
+    Texture chickenTex(chickenTexLocation);
+    chickenTex.LoadTexture();
 
+    const char* meshFile="Meshes/chicken.fbx";
+    Mesh chicken(meshFile);
 
 
 
@@ -136,8 +136,7 @@ int main() {
 
     for (int i = 0; i < howManyCubes; i++) {
         int rng= std::rand()%3;
-        ObjectManager* obj= new ObjectManager(simpleShader.shader_program(), (rng>1)?pyramidVerts:CubeVertices, (rng>1)?pyramidUVs:CubeUVs, (rng>1)?pyramidIndices:CubeIndices, ((std::rand()%3)>1) ? tex1 : tex2);
-        obj->PrimeObjectIndexed();
+        ObjectManager* obj= new ObjectManager(program,chicken, chickenTex);
         meshList.push_back(obj);
     }
 
@@ -148,16 +147,25 @@ int main() {
     CameraManager camera(aspect_ratio, near, far, fov, glm::vec3(0.0f, 1.0f, 0.0f));
 
 
+
     //make material
         Material shiny(1.0, 50.0f);
+//light data
 
     //Lights
     std::vector<Light> lights;
     Light dirLight;
-    dirLight.CreateDirectionalLight(glm::vec3(0.0f,-1.0f, 0.0f), glm::vec4(1.0f), 0.45, 0.65);
-    lights.push_back(dirLight);
+     dirLight.CreateDirectionalLight(glm::vec3(0.0f,-1.0f, 0.0f), glm::vec4(1.0f), 0.35, 0.65);
+     lights.push_back(dirLight);
+    //
+    Light pointLight;
+    pointLight.CreatePointLight(glm::vec3(0.0f,0.0f, 0.0f), glm::vec4(1.0f, .5f, 0.24f, 1.0f), 0.2f,.65f, 0.1f, 0.3f , 0.5f);
+    lights.push_back((pointLight));
 
-    //input system
+    Light spotLight;
+    spotLight.CreateSpotLight(glm::vec3(0.0f,-1.0f, 0.0f), glm::vec3(0, 3, 0), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), 0.2f,.65f, 0.1f, 0.3f , 0.5f, 60.0f);
+    lights.push_back(spotLight);
+    // //input system
 
     InputSystem* inputSystem= new InputSystem(camera, 50, 60);
     inputSystem->RegisterCallbacks(*mainWindow.window);
@@ -165,7 +173,7 @@ int main() {
 
     for (ObjectManager * o : meshList) {
         ObjectTransform &transform= o->getTransform();
-        TestTransform(transform);
+        TestTransform(transform , 10, 180);
 
     }
 
@@ -186,7 +194,7 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         for (ObjectManager * o  : meshList) {
-            o->DrawObjectIndexed(camera, lights, shiny);
+            o->DrawObject(camera, lights, shiny);
         }
 
         glfwSwapBuffers(mainWindow.window);
