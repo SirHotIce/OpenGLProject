@@ -104,6 +104,15 @@ void GLpipeline::ObjectManager::DrawObject( CameraManager& camera, std::vector<L
     material.BindMaterial(*shaderProgram);
     Light::SetupLights(lights, *shaderProgram);
 
+    //manga shader specific
+    GLuint farPlaneLoc= glGetUniformLocation(*shaderProgram, "farPlane");
+    GLuint nearPlaneLoc= glGetUniformLocation(*shaderProgram, "nearPlane");
+
+    if (farPlaneLoc!=-1 && nearPlaneLoc!=-1) {
+        glUniform1f(farPlaneLoc, camera.getFarPlane());
+        glUniform1f(nearPlaneLoc, camera.getNearPlane());
+    }
+
     glUniform1i(texLoc, 0);//telling the shader that the value for the uniform tex loc is 0
         glBindVertexArray(VAO);
                 glDrawElements(GL_TRIANGLES, mesh->GetIndices().size(), GL_UNSIGNED_INT, 0);//no need to pass indices here as we have an already going IBO bound

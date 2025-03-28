@@ -51,6 +51,8 @@ namespace GLpipeline {
          glm::vec3& get_camera_position() ;
          glm::vec3& get_camera_front() ;
 
+        float& getFarPlane();
+        float& getNearPlane();
     };
 }
 

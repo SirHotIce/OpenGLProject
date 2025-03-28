@@ -31,6 +31,7 @@ add_executable(OpenGLProject src/main.cpp
         src/GLpipeline/Material.h
         src/GLpipeline/Mesh.cpp
         src/GLpipeline/Mesh.h
+        src/Utils/BasicMeshes.h
 )
 #link opengl
 find_package(OpenGL REQUIRED)

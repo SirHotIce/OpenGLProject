@@ -19,81 +19,18 @@ using namespace GLinterface;
 using namespace GLpipeline;
 
 Window mainWindow;
-std::vector<GLfloat> CubeVertices = {
-    -0.5f, -0.5f, -0.5f, // 0: Left  Bottom Back
-     0.5f, -0.5f, -0.5f,// 1: Right Bottom Back
-     0.5f,  0.5f, -0.5f, // 2: Right Top    Back
-    -0.5f,  0.5f, -0.5f, // 3: Left  Top    Back
-    -0.5f, -0.5f,  0.5f, // 4: Left  Bottom Front
-     0.5f, -0.5f,  0.5f, // 5: Right Bottom Front
-     0.5f,  0.5f,  0.5f, // 6: Right Top    Front
-    -0.5f,  0.5f,  0.5f  // 7: Left  Top    Front
-};
-std::vector<GLfloat> CubeUVs = {
-   0.0f, 1.0f,// 0: Left  Bottom Back
-   1.0f, 1.0f,// 1: Right Bottom Back
-   1.0f, 0.0f,// 2: Right Top    Back
-   0.0f, 0.0f,// 3: Left  Top    Back
-   0.0f, 0.0f,// 4: Left  Bottom Front
-   1.0f, 0.0f,// 5: Right Bottom Front
-   1.0f, 1.0f,// 6: Right Top    Front
-   0.0f, 1.0f // 7: Left  Top    Front
-};
-std::vector<GLuint> CubeIndices = {
-    // Back face
-    0, 1, 2,
-    2, 3, 0,
-
-    // Front face
-    4, 5, 6,
-    6, 7, 4,
-
-    // Left faces
-    0, 4, 7,
-    7, 3, 0,
-
-    // Right face
-    1, 5, 6,
-    6, 2, 1,
-
-    // Bottom face
-    0, 1, 5,
-    5, 4, 0,
-
-    // Top face
-    3, 2, 6,
-    6, 7, 3
-};
-
-std::vector<GLfloat> pyramidVerts = {
-    -1.0f, -1.0f, 0.0f,
-    0.0f, -1.0f, 1.0f,
-    1.0f, -1.0f, 0.0f,
-    0.0f, 1.0f, 0.0f
-};
-
-std::vector<GLfloat> pyramidUVs = {
-    0.0f, 0.0f,
-    0.5f, 0.0f,
-    1.0f, 0.0f,
-    0.5f, 1.0f
-};
-std::vector<GLuint> pyramidIndices = {
-   0,3,1,
-    1,3,2,
-    2,3,0,
-    0,1,2
-};
 std::vector<ObjectManager*> meshList={};
-std::string fsLocation="Shaders/traingle_fs.glsl";
-std::string vsLocation="Shaders/traingle_vs.glsl";
+std::string fsLocation="Shaders/Basic_Phong_fs.glsl";
+std::string fsLocation_Toon="Shaders/Toon_Shader_fs.glsl";
+std::string fsLocation_Toon_Hatched="Shaders/Hatched_Cartoon_fs.glsl";
+std::string vsLocation="Shaders/MVP_vs.glsl";
 void PopulateWindowData() {
     mainWindow.title="Basic Renderer";
     mainWindow.windowWidth = 2000;
     mainWindow.windowHeight = 2000;
-    mainWindow.cR=0.5f;
-    mainWindow.cG=0.5f;
-    mainWindow.cB=0.5f;
+    mainWindow.cR=1.0f;
+    mainWindow.cG=1.0f;
+    mainWindow.cB=1.0f;
     mainWindow.cA=1.0f;
 }
 void TestTransform(ObjectTransform& transform, int translationRange, int rotationRange) {
@@ -106,6 +43,25 @@ void TestTransform(ObjectTransform& transform, int translationRange, int rotatio
     transform.set_rotation(glm::vec3(0.0f, roty, rotz));//rotate 90 degres in z
     transform.set_scale(glm::vec3(2.0f, 2.0f, 2.0f));//make it small
 }
+void CenterMesh(ObjectTransform& transform) {
+    transform.set_translation( glm::vec3(0, 0, 0));//move x =5, y=1
+    transform.set_rotation(glm::vec3(0.0f, 0, 0));//rotate 90 degres in z
+    transform.set_scale(glm::vec3(2.0f, 2.0f, 2.0f));//make it small
+}
+
+void CreateLights(std::vector<Light>& lights) {
+    Light dirLight;
+    dirLight.CreateDirectionalLight(glm::vec3(0.0f,-1.0f, 0.0f), glm::vec4(1.0f), 0.35, 0.65);
+    lights.push_back(dirLight);
+    //
+    Light pointLight;
+    pointLight.CreatePointLight(glm::vec3(0.0f,0.0f, 2.0f), glm::vec4(1.0f, .5f, 0.24f, 1.0f), 0.2f,.65f, 0.1f, 0.3f , 0.5f);
+    lights.push_back((pointLight));
+
+    Light spotLight;
+    spotLight.CreateSpotLight(glm::vec3(0.0f,-1.0f, 0.0f), glm::vec3(0, 3, 0), glm::vec4(1.0f, 0.85f, 0.55f, 1.0f), 0.2f,.65f, 0.1f, 0.3f , 0.5f, 60.0f);
+    lights.push_back(spotLight);
+}
 
 int main() {
     PopulateWindowData();
@@ -114,9 +70,9 @@ int main() {
         return 1;
     }
 
-    int howManyCubes=20;
+    int howManyMeshes=20;
 
-    ShaderManager simpleShader(vsLocation, fsLocation);
+    ShaderManager simpleShader(vsLocation, fsLocation_Toon_Hatched);
     GLuint& program= simpleShader.shader_program();
 //
     //create texs
@@ -131,14 +87,15 @@ int main() {
 
 
 
+    ObjectManager* obj= new ObjectManager(program,chicken, chickenTex);
+    ObjectTransform &transform= obj->getTransform();
+    CenterMesh(transform);
 
-    //end
-
-    for (int i = 0; i < howManyCubes; i++) {
-        int rng= std::rand()%3;
-        ObjectManager* obj= new ObjectManager(program,chicken, chickenTex);
-        meshList.push_back(obj);
-    }
+    // for (int i = 0; i < howManyMeshes; i++) {
+    //     int rng= std::rand()%3;
+    //     ObjectManager* obj= new ObjectManager(program,chicken, chickenTex);
+    //     meshList.push_back(obj);
+    // }
 
     GLfloat aspect_ratio= mainWindow.bWidth / mainWindow.bHeight;
     GLfloat fov= 60.0f;
@@ -146,36 +103,24 @@ int main() {
     GLfloat far= 1000.0f;
     CameraManager camera(aspect_ratio, near, far, fov, glm::vec3(0.0f, 1.0f, 0.0f));
 
-
-
     //make material
-        Material shiny(1.0, 50.0f);
-//light data
+    Material shiny(1.0, 50.0f);
+
 
     //Lights
     std::vector<Light> lights;
-    Light dirLight;
-     dirLight.CreateDirectionalLight(glm::vec3(0.0f,-1.0f, 0.0f), glm::vec4(1.0f), 0.35, 0.65);
-     lights.push_back(dirLight);
-    //
-    Light pointLight;
-    pointLight.CreatePointLight(glm::vec3(0.0f,0.0f, 0.0f), glm::vec4(1.0f, .5f, 0.24f, 1.0f), 0.2f,.65f, 0.1f, 0.3f , 0.5f);
-    lights.push_back((pointLight));
+    CreateLights(lights);
 
-    Light spotLight;
-    spotLight.CreateSpotLight(glm::vec3(0.0f,-1.0f, 0.0f), glm::vec3(0, 3, 0), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), 0.2f,.65f, 0.1f, 0.3f , 0.5f, 60.0f);
-    lights.push_back(spotLight);
-    // //input system
-
+    //input system
     InputSystem* inputSystem= new InputSystem(camera, 50, 60);
     inputSystem->RegisterCallbacks(*mainWindow.window);
-    //assign the input instance to the window
 
-    for (ObjectManager * o : meshList) {
-        ObjectTransform &transform= o->getTransform();
-        TestTransform(transform , 10, 180);
 
-    }
+    // for (ObjectManager * o : meshList) {
+    //     ObjectTransform &transform= o->getTransform();
+    //     TestTransform(transform , 10, 180);
+    //
+    // }
 
 
     float deltaTime = 0.0f;
@@ -193,18 +138,20 @@ int main() {
         glClearColor(mainWindow.cR, mainWindow.cG, mainWindow.cB, mainWindow.cA);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        for (ObjectManager * o  : meshList) {
-            o->DrawObject(camera, lights, shiny);
-        }
+        // for (ObjectManager * o  : meshList) {
+        //     o->DrawObject(camera, lights, shiny);
+        // }
 
+        obj->DrawObject(camera, lights, shiny);
         glfwSwapBuffers(mainWindow.window);
 
     }
 
-    for (ObjectManager * o   : meshList) {
-        o->DestroyObject();
-        delete o;
-    }
+    // for (ObjectManager * o   : meshList) {
+    //     o->DestroyObject();
+    //     delete o;
+    // }
+    delete obj;
     delete inputSystem;
     glfwTerminate();
     simpleShader.DestroyShader();

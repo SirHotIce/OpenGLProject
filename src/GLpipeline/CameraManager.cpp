@@ -54,3 +54,11 @@ const glm::mat4 & GLpipeline::CameraManager::get_updated_view() {
  glm::vec3 & GLpipeline::CameraManager::get_camera_front()  {
     return front;
 }
+
+float & GLpipeline::CameraManager::getFarPlane() {
+    return farPlane;
+}
+
+float & GLpipeline::CameraManager::getNearPlane() {
+    return nearPlane;
+}
