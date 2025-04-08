@@ -35,7 +35,7 @@ namespace GLpipeline {
         }
 
         void LoadTexture();
-        void BindTexture();
+        void BindTexture(GLenum texUnit);
         void UnbindTexture();
         void ClearTexture();
         ~Texture() {

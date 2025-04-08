@@ -21,9 +21,11 @@ using namespace GLpipeline;
 Window mainWindow;
 std::vector<ObjectManager*> meshList={};
 std::string fsLocation="Shaders/Basic_Phong_fs.glsl";
+std::string shadow_fsLocation="Shaders/ShadowMap_fs.glsl";
 std::string fsLocation_Toon="Shaders/Toon_Shader_fs.glsl";
-std::string fsLocation_Toon_Hatched="Shaders/Hatched_Cartoon_fs.glsl";
+//std::string fsLocation_Toon_Hatched="Shaders/Basic_Phong_fs.glsl";
 std::string vsLocation="Shaders/MVP_vs.glsl";
+std::string shadow_vsLocation="Shaders/ShadowMap_vs.glsl";
 void PopulateWindowData() {
     mainWindow.title="Basic Renderer";
     mainWindow.windowWidth = 2000;
@@ -54,13 +56,13 @@ void CreateLights(std::vector<Light>& lights) {
     dirLight.CreateDirectionalLight(glm::vec3(0.0f,-1.0f, 0.0f), glm::vec4(1.0f), 0.35, 0.65);
     lights.push_back(dirLight);
     //
-    Light pointLight;
-    pointLight.CreatePointLight(glm::vec3(0.0f,0.0f, 2.0f), glm::vec4(1.0f, .5f, 0.24f, 1.0f), 0.2f,.65f, 0.1f, 0.3f , 0.5f);
-    lights.push_back((pointLight));
-
-    Light spotLight;
-    spotLight.CreateSpotLight(glm::vec3(0.0f,-1.0f, 0.0f), glm::vec3(0, 3, 0), glm::vec4(1.0f, 0.85f, 0.55f, 1.0f), 0.2f,.65f, 0.1f, 0.3f , 0.5f, 60.0f);
-    lights.push_back(spotLight);
+    // Light pointLight;
+    // pointLight.CreatePointLight(glm::vec3(0.0f,0.0f, 2.0f), glm::vec4(1.0f, .5f, 0.24f, 1.0f), 0.2f,.65f, 0.1f, 0.3f , 0.5f);
+    // lights.push_back((pointLight));
+    //
+    // Light spotLight;
+    // spotLight.CreateSpotLight(glm::vec3(0.0f,-1.0f, 0.0f), glm::vec3(0, 3, 0), glm::vec4(1.0f, 0.85f, 0.55f, 1.0f), 0.2f,.65f, 0.1f, 0.3f , 0.5f, 60.0f);
+    // lights.push_back(spotLight);
 }
 
 int main() {
@@ -72,9 +74,16 @@ int main() {
 
     int howManyMeshes=20;
 
-    ShaderManager simpleShader(vsLocation, fsLocation_Toon_Hatched);
+    ShaderManager simpleShader(vsLocation, fsLocation);
     GLuint& program= simpleShader.shader_program();
+
+    ShaderManager shadowShader(shadow_vsLocation, shadow_fsLocation);
+    GLuint& shadowProgram= shadowShader.shader_program();
 //
+
+    ShadowMap shadow_map;
+    shadow_map.InitializeShadowMap(mainWindow.bWidth, mainWindow.bHeight);
+
     //create texs
     //this is a temp soln
 
@@ -134,7 +143,11 @@ int main() {
         //update input time
         inputSystem->UpdateDeltaTime(deltaTime);
 
+        glClear( GL_DEPTH_BUFFER_BIT);
+        shadow_map.WriteToShadowMap();
+        obj->DrawObjectToLight(lights[0], shadowProgram);
 
+        shadow_map.UnBind();
         glClearColor(mainWindow.cR, mainWindow.cG, mainWindow.cB, mainWindow.cA);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -142,7 +155,7 @@ int main() {
         //     o->DrawObject(camera, lights, shiny);
         // }
 
-        obj->DrawObject(camera, lights, shiny);
+        obj->DrawObjectWithShadows(camera, lights, shiny, shadow_map);
         glfwSwapBuffers(mainWindow.window);
 
     }

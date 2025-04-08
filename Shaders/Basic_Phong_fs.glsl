@@ -4,7 +4,9 @@ out vec4 color;
 in vec4 position;
 in vec2 UVs;
 in vec3 Normals;
-uniform sampler2D textureSample;
+in vec4 directionalLightRefrence;
+uniform sampler2D textureSample;//slot 0
+uniform sampler2D shadowMap;//slot 1
 in vec3 fragPos;//just pure position data not based on projection or the view matrix only model
 uniform vec3 cameraPosition;
 
@@ -29,7 +31,16 @@ uniform float attenuationConstant[MAX_LIGHT_COUNT];
 uniform float lightAngle[MAX_LIGHT_COUNT];
 
 
+float CalcShadowFactor(int i){
+    vec3 lightProjValue= directionalLightRefrence.xyz/directionalLightRefrence.w;//dividing by w normalizes the value to -1 to 1
+    lightProjValue= (lightProjValue*0.5)+0.5; //this puts the value in 0 to 1 range
+    float sampledDepth = texture(shadowMap, vec2(lightProjValue.x, lightProjValue.y)).r;//since the light proj is ortho z can be ignored and x value and y value normalized ot 0 to 1 will be acting as u and v, although depth exists it dowesnt look like it
+    float currentFragDepthInLightSpace= lightProjValue.z;//gives the depth
+    float bias= max( (0.05* dot(fragPos, lightDir[i])), 0.005);//to fix shadow acne
+    float shadow=  (currentFragDepthInLightSpace-bias) >sampledDepth ?1.0:0.0;
 
+    return shadow;
+}
 
 float calculateDiffuse(vec3 lightVector){
     float diffFactor=max(dot( normalize(Normals),normalize(lightVector)), 0.0f);
@@ -48,6 +59,7 @@ float calculateSpecular(vec3 lightVector){
 
     return specularFactor;
 }
+
 vec4 CalculateLightValue(int lightIndex, vec3 direction){
     vec4 ambientColor= lightColor[lightIndex]*ambientStrength[lightIndex];
     float diffuseFactor= calculateDiffuse(direction);
@@ -58,7 +70,8 @@ vec4 CalculateLightValue(int lightIndex, vec3 direction){
         specularColor= vec4(1.0f)* specularFactor*material.specularIntensity;
     }
 
-    vec4 calculatedColor= ambientColor+diffuesColor+specularColor;
+    float shadowFactor= CalcShadowFactor(lightIndex);
+    vec4 calculatedColor= ambientColor+ ((1-shadowFactor)*(diffuesColor+specularColor));
     return calculatedColor;
 }
 vec4 CalculatePointLight(int i){

@@ -31,8 +31,8 @@ void GLpipeline::Texture::LoadTexture() {
     stbi_image_free(textureData);
 }
 
-void GLpipeline::Texture::BindTexture() {
-    glActiveTexture(GL_TEXTURE0);//making texture  slot 0 active for binding
+void GLpipeline::Texture::BindTexture(GLenum texUnit) {
+    glActiveTexture(texUnit);//making texture  slot 0 active for binding
     glBindTexture(GL_TEXTURE_2D, textureID);
 }
 

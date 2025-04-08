@@ -16,6 +16,7 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include "Mesh.h"
+#include "ShadowMap.h"
 
 namespace GLpipeline {
     class ObjectManager {
@@ -67,6 +68,8 @@ namespace GLpipeline {
         //void DrawObjectNonIndexed(CameraManager& camera, std::vector<Light>& lights, Material& material);
         void PrimeObject();
         void DrawObject(CameraManager& camera, std::vector<Light>& lights, Material& material);
+        void DrawObjectWithShadows(CameraManager& camera, std::vector<Light>& lights, Material& material, ShadowMap& shadowMap);
+        void DrawObjectToLight( Light light, GLuint& lightShader);
         void DestroyObject();
         ~ObjectManager(){DestroyObject();};
 

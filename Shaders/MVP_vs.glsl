@@ -6,13 +6,16 @@ layout (location=2) in vec3 NormalsIn;
 uniform mat4 model;
 uniform mat4 projection;
 uniform mat4 view;
+uniform mat4 lightSpaceMatrix;
 out vec4 position;
 out vec2 UVs;
 out vec3 Normals;
 out vec3 fragPos;
+out vec4 directionalLightRefrence;
 void main(){
 
     position= projection*view*model*vec4(pos,1.0);
+    directionalLightRefrence= lightSpaceMatrix*model*vec4(pos,1.0);//releative to the light
     UVs=UVin;
     Normals= - mat3(transpose(inverse(model)))*NormalsIn;//normals were orignally filpped when imported. so we are filpping them back
     fragPos= (model*vec4(pos, 1.0)).xyz;

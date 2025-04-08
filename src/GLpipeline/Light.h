@@ -34,6 +34,10 @@ namespace GLpipeline {
         void CreateSpotLight(glm::vec3 light_dir, glm::vec3 light_position, glm::vec4 light_color, float ambient_strength, float diffuse_strength, float linear_att, float exponent_att, float att_cconstant ,float cutoff);
 
         static void SetupLights(std::vector<Light>& lights, GLuint shaderProgram);
+        glm::mat4 GetLightMatrix();
+        int GetLightType() {
+            return lightType;
+        }
     };
 }
 

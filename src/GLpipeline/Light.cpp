@@ -92,4 +92,14 @@ void GLpipeline::Light::SetupLights(std::vector<Light>& lights, GLuint shaderPro
         glUniform1f(lightAngleLocation, glm::radians(lights[i].cutOffAngle));
 
     }
+
+}
+
+glm::mat4 GLpipeline::Light::GetLightMatrix() {
+    //create the lightspace matrix
+    glm::mat4 lightProjection= glm::ortho(-5.0f, 5.0f, -5.0f, 5.0f, 0.1f, 100.0f);
+    //the view vec will be ust the light to the origin with world up
+    glm::mat4 lightView= glm::lookAt(lightDir, glm::vec3(0), glm::vec3(0, 1, 0));
+    glm::mat4 lightSpaceMatrix= lightProjection * lightView;
+    return lightSpaceMatrix;
 }

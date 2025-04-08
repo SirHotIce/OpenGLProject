@@ -91,7 +91,7 @@ void GLpipeline::ObjectManager::PrimeObject() {
 
 void GLpipeline::ObjectManager::DrawObject( CameraManager& camera, std::vector<Light>& lights, Material& material) {
     glUseProgram(*shaderProgram);
-    texture->BindTexture();//use this tex to draw the model bound to tex slot 0
+    texture->BindTexture(0);//use this tex to draw the model bound to tex slot 0
     GLint modelLoc= glGetUniformLocation(*shaderProgram, "model");
     GLint projLoc= glGetUniformLocation(*shaderProgram, "projection");
     GLint viewLoc= glGetUniformLocation(*shaderProgram, "view");
@@ -120,6 +120,66 @@ void GLpipeline::ObjectManager::DrawObject( CameraManager& camera, std::vector<L
     texture->UnbindTexture();
     glUseProgram(0);
 
+}
+
+void GLpipeline::ObjectManager::DrawObjectWithShadows(CameraManager &camera, std::vector<Light> &lights,
+    Material &material, ShadowMap &shadowMap) {
+    glUseProgram(*shaderProgram);
+    texture->BindTexture(GL_TEXTURE0);//use this tex to draw the model bound to tex slot 0
+    shadowMap.ReadShadowMap(GL_TEXTURE1);
+    GLint modelLoc= glGetUniformLocation(*shaderProgram, "model");
+    GLint projLoc= glGetUniformLocation(*shaderProgram, "projection");
+    GLint viewLoc= glGetUniformLocation(*shaderProgram, "view");
+    GLint directionalLightRefrenceLoc= glGetUniformLocation(*shaderProgram, "directionalLightRefrence");
+    GLint texLoc= glGetUniformLocation(*shaderProgram, "texture");
+    GLint shadowLoc= glGetUniformLocation(*shaderProgram, "shadowMap");
+    GLint cameraPositionLocation= glGetUniformLocation(*shaderProgram, "cameraPosition");
+
+
+    glm::mat4 lightMatrix;
+    for (Light light: lights) {
+        if (light.GetLightType()==1) {
+            lightMatrix = light.GetLightMatrix();
+            break;
+        }
+    }
+
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(transform.get_model()));
+    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(camera.get_projection()));
+    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(camera.get_updated_view()));
+    glUniformMatrix4fv(directionalLightRefrenceLoc, 1, GL_FALSE, glm::value_ptr(lightMatrix));
+    glUniform3fv(cameraPositionLocation, 1, glm::value_ptr(camera.get_camera_position()));
+    material.BindMaterial(*shaderProgram);
+    Light::SetupLights(lights, *shaderProgram);
+
+    //manga shader specific
+    GLuint farPlaneLoc= glGetUniformLocation(*shaderProgram, "farPlane");
+    GLuint nearPlaneLoc= glGetUniformLocation(*shaderProgram, "nearPlane");
+
+    if (farPlaneLoc!=-1 && nearPlaneLoc!=-1) {
+        glUniform1f(farPlaneLoc, camera.getFarPlane());
+        glUniform1f(nearPlaneLoc, camera.getNearPlane());
+    }
+
+    glUniform1i(texLoc, 0);//telling the shader that the value for the uniform tex  is 0
+    glUniform1i(shadowLoc, 1);//telling the shader that the value for the uniform shadow map  is 1
+    glBindVertexArray(VAO);
+    glDrawElements(GL_TRIANGLES, mesh->GetIndices().size(), GL_UNSIGNED_INT, 0);//no need to pass indices here as we have an already going IBO bound
+    glBindVertexArray(0);
+    texture->UnbindTexture();
+    glUseProgram(0);
+}
+
+void GLpipeline::ObjectManager::DrawObjectToLight(Light light, GLuint &lightShader) {
+    glUseProgram(lightShader);
+    GLint modelLoc= glGetUniformLocation(lightShader, "model");
+    GLint lightSpaceMatrixLoc= glGetUniformLocation(lightShader, "lightSpaceMatrix");
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(transform.get_model()));
+    glUniformMatrix4fv(lightSpaceMatrixLoc, 1, GL_FALSE, glm::value_ptr(light.GetLightMatrix()));
+    glBindVertexArray(VAO);
+    glDrawElements(GL_TRIANGLES, mesh->GetIndices().size(), GL_UNSIGNED_INT, 0);//no need to pass indices here as we have an already going IBO bound
+    glBindVertexArray(0);
+    glUseProgram(0);
 }
 
 

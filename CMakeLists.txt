@@ -32,6 +32,8 @@ add_executable(OpenGLProject src/main.cpp
         src/GLpipeline/Mesh.cpp
         src/GLpipeline/Mesh.h
         src/Utils/BasicMeshes.h
+        src/GLpipeline/ShadowMap.cpp
+        src/GLpipeline/ShadowMap.h
 )
 #link opengl
 find_package(OpenGL REQUIRED)
